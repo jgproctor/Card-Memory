@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Game from './Game';
 
-export default function App() {
-  return (
-    <div>
-      <p>Placeholder</p>
-    </div>
-  );
+const App = () => {
+  const [gameId, setGameId] = useState(1);
+  return <Game key={gameId} startNewGame={() => setGameId(gameId + 1)} />;
 }
+
+export default App;
