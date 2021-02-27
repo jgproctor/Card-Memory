@@ -7,7 +7,7 @@ import utils from '../math-utils';
 const useGameState = () => {
   const [candidateCards, setCandidateCards] = useState([]);
   const [visibleCards, setVisibleCards] = useState([]);
-  const [hiddenCards, setHiddenCards] = useState(utils.range(1, 9).concat(utils.range(1, 9)));
+  const [hiddenCards, setHiddenCards] = useState(utils.range(1, 9));
   const [secondsPassed, setSecondsPassed] = useState(0);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const Game = props => {
       <div className="body">
         <div className="gameStatus">
           {gameStatus !== 'active' ? (
-            <PlayAgain onClick={props.startNewGame} gameStatus={gameStatus} />
+            <PlayAgain onClick={() => props.startNewGame} gameStatus={gameStatus} />
           ) : (
               <div>
                 Placeholder
@@ -86,17 +86,21 @@ const Game = props => {
             )}
         </div>
         <div className="cardLayout">
-          {utils.range(1, 9).concat(utils.range(1, 9)).map(card => (
-            <PlayCard
-              key={card}
-              status={cardStatus(card)}
-              card={card}
-              onClick={onCardClick}
-            />
+          {utils.range(1, 9).map(card => (
+            (
+              <PlayCard
+                key={card}
+                status={cardStatus(card)}
+                card={card}
+                onClick={() => onCardClick(card, cardStatus(card))}
+              />
+            )
           ))}
         </div>
       </div>
-      <div className="timer">Time Remaining: {secondsPassed}</div>
+      <div className="timer">
+        Time Remaining: {secondsPassed}
+      </div>
     </div>
   );
 };
