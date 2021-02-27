@@ -4,6 +4,7 @@ import ReactDOMServer from 'react-dom/server';
 import App from '../components/App';
 
 const server = express();
+const port = 4242;
 server.use(express.static('dist'));
 
 server.get('/', (req, res) => {
@@ -22,4 +23,4 @@ server.get('/', (req, res) => {
   `)
 });
 
-server.listen(4242, () => console.log('Server is running...'));
+server.listen(port, () => console.log(`Server is running on ${port}`));
