@@ -7,13 +7,13 @@ import utils from '../math-utils';
 const useGameState = () => {
   const [candidateCards, setCandidateCards] = useState([]);
   const [visibleCards, setVisibleCards] = useState([]);
-  const [hiddenCards, setHiddenCards] = useState(utils.range(1, 9));
+  const [hiddenCards, setHiddenCards] = useState(utils.range(1, 9).concat(utils.range(1, 9)));
   const [secondsPassed, setSecondsPassed] = useState(0);
 
   useEffect(() => {
     if (hiddenCards.length > 0) {
-      const timerId = setTimeout(() => setSecondsPassed(secondsPassed + 1), 1000);
-      return () => clearTimeout(timerId);
+      const timer = setTimeout(() => setSecondsPassed(secondsPassed + 1), 1000);
+      return () => clearTimeout(timer);
     }
   });
 
@@ -30,7 +30,14 @@ const useGameState = () => {
     setCandidateCards([]);
   };
 
-  return { candidateCards, visibleCards, hiddenCards, secondsPassed, setGameState };
+  const startNewGame = () => {
+    setCandidateCards([]);
+    setVisibleCards([]);
+    setHiddenCards(utils.range(1, 9));
+    setSecondsPassed(0);
+  };
+
+  return { candidateCards, visibleCards, hiddenCards, secondsPassed, setGameState, startNewGame };
 };
 
 const Game = props => {
@@ -38,7 +45,8 @@ const Game = props => {
     candidateCards,
     hiddenCards,
     secondsPassed,
-    setGameState
+    setGameState,
+    startNewGame
   } = useGameState();
 
   const candidateCardsAreWrong = candidateCards[0] !== candidateCards[1];
@@ -62,10 +70,7 @@ const Game = props => {
       return;
     }
 
-    const newCandidateCards =
-      currentStatus === 'hidden' && candidateCards.length < 2
-        ? candidateCards.concat(card)
-        : candidateCards;
+    const newCandidateCards = [card, card]
 
     setGameState(newCandidateCards);
   }
@@ -78,28 +83,38 @@ const Game = props => {
       <div className="body">
         <div className="gameStatus">
           {gameStatus !== 'active' ? (
-            <PlayAgain onClick={() => props.startNewGame} gameStatus={gameStatus} />
+            <PlayAgain onClick={() => {
+              props.startNewGame;
+              startNewGame();
+            }} />
           ) : (
-              <div>
-                Placeholder
-              </div>
-            )}
-        </div>
-        <div className="cardLayout">
-          {utils.range(1, 9).map(card => (
-            (
-              <PlayCard
-                key={card}
-                status={cardStatus(card)}
-                card={card}
-                onClick={() => onCardClick(card, cardStatus(card))}
-              />
-            )
-          ))}
+            <div className="cardLayout">
+              {utils.range(1, 9).map(card => (
+                (
+                  <PlayCard
+                    key={`${card}a`}
+                    status={cardStatus(card)}
+                    card={card}
+                    onClick={() => onCardClick(card, cardStatus(card))}
+                  />
+                )
+              ))}
+              {utils.range(1, 9).map(card => (
+                (
+                  <PlayCard
+                    key={`${card}b`}
+                    status={cardStatus(card)}
+                    card={card}
+                    onClick={() => onCardClick(card, cardStatus(card))}
+                  />
+                )
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="timer">
-        Time Remaining: {secondsPassed}
+        Elapsed Time: {secondsPassed}
       </div>
     </div>
   );

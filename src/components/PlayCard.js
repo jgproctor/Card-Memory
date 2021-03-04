@@ -3,12 +3,23 @@ import React from 'react';
 
 const PlayCard = props => {
   return (
-    <button
-      style={{ backgroundColor: 'lightgray' }}
-      onClick={props.onClick}
-    >
-      {props.card}
-    </button>
+    <div>{
+      props.status === 'visible' ? (
+        <button
+          style={{ backgroundColor: 'lightgray', height: 50, width: 50 }}
+          onClick={props.onClick}
+        >
+          {props.card}
+        </button>
+      ) : (
+        <button
+          style={{ backgroundColor: 'lightgray', height: 50, width: 50 }}
+          onClick={props.onClick}
+        >
+        </button>
+      )
+    }
+    </div>
   );
 };
 

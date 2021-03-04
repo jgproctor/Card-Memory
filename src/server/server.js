@@ -4,7 +4,7 @@ import ReactDOMServer from 'react-dom/server';
 import App from '../components/App';
 
 const server = express();
-const port = 4242;
+const port = 4200;
 server.use(express.static('dist'));
 
 server.get('/', (req, res) => {
