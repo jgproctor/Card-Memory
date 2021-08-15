@@ -1,14 +1,17 @@
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PlayCard from './PlayCard';
 import PlayAgain from './PlayAgain';
-import utils from '../math-utils';
 
 const useGameState = () => {
+  const cards = ['1a', '2a', '3a', '4a', '5a', '6a', '7a', '8a', '1b', '2b', '3b', '4b', '5b', '6b', '7b', '8b'];
+  let isWrongMatch = false;
+  let shuffledCards = shuffleArray(cards)
   const [candidateCards, setCandidateCards] = useState([]);
   const [visibleCards, setVisibleCards] = useState([]);
-  const [hiddenCards, setHiddenCards] = useState(utils.range(1, 9).concat(utils.range(1, 9)));
+  const [hiddenCards, setHiddenCards] = useState(shuffledCards);
   const [secondsPassed, setSecondsPassed] = useState(0);
+  const [gameCards, setGameCards] = useState(shuffledCards);
 
   useEffect(() => {
     if (hiddenCards.length > 0) {
@@ -17,49 +20,63 @@ const useGameState = () => {
     }
   });
 
+  useRef(() => {
+    if (isWrongMatch) {
+      const timer = setTimeout(() => { }, 2000);
+      isWrongMatch = false;
+      return () => clearTimeout(timer);
+    }
+  });
+
   const setGameState = (newCandidateCards) => {
-    if (newCandidateCards[0] !== newCandidateCards[1]) {
-      setHiddenCards(hiddenCards.concat(newCandidateCards));
-    } else {
-      const newHiddenCards = hiddenCards.filter(
+    let newHiddenCards;
+    if (newCandidateCards.length < 2) {
+      newHiddenCards = filterAndSetHiddenCards(newHiddenCards, hiddenCards, newCandidateCards, setHiddenCards);
+      setCandidateCards(newCandidateCards);
+      setVisibleCards(newCandidateCards);
+    } else if (newCandidateCards.length === 2 && newCandidateCards[0][0] === newCandidateCards[1][0]) {
+      newHiddenCards = filterAndSetHiddenCards(newHiddenCards, hiddenCards, newCandidateCards, setHiddenCards);
+      setVisibleCards(visibleCards.concat(newCandidateCards));
+      setCandidateCards([]);
+    } else if (newCandidateCards.length == 2 && newCandidateCards[0][0] !== newCandidateCards[1][0]) {
+      isWrongMatch = true;
+      newHiddenCards = hiddenCards.filter(
         c => !newCandidateCards.includes(c)
       );
+      newHiddenCards = newHiddenCards.concat(newCandidateCards);
+      setCandidateCards([]);
       setHiddenCards(newHiddenCards);
-      setVisibleCards(visibleCards.concat(newCandidateCards));
     }
-    setCandidateCards([]);
   };
 
   const startNewGame = () => {
     setCandidateCards([]);
     setVisibleCards([]);
-    setHiddenCards(utils.range(1, 9));
+    let shuffledCards = shuffleArray(cards);
+    setGameCards(shuffledCards);
+    setHiddenCards(shuffledCards);
     setSecondsPassed(0);
   };
 
-  return { candidateCards, visibleCards, hiddenCards, secondsPassed, setGameState, startNewGame };
+  return { candidateCards, gameCards, hiddenCards, secondsPassed, setGameState, startNewGame };
 };
 
 const Game = props => {
   const {
     candidateCards,
+    gameCards,
     hiddenCards,
     secondsPassed,
     setGameState,
     startNewGame
   } = useGameState();
 
-  const candidateCardsAreWrong = candidateCards[0] !== candidateCards[1];
   const gameStatus = hiddenCards.length === 0
     ? 'won' : 'active';
 
   const cardStatus = card => {
     if (!hiddenCards.includes(card)) {
       return 'visible';
-    }
-
-    if (candidateCards.includes(card)) {
-      return candidateCardsAreWrong ? 'wrong' : 'candidate';
     }
 
     return 'hidden';
@@ -70,45 +87,38 @@ const Game = props => {
       return;
     }
 
-    const newCandidateCards = [card, card]
-
+    const newCandidateCards = candidateCards.length < 2 ? candidateCards.concat(card) : candidateCards;
     setGameState(newCandidateCards);
   }
 
   return (
-    <div className="game">
-      <div className="help">
-        Pick 2 cards to see if they match.
+    <div>
+      <div>
+        {gameStatus === 'active' ? (
+          <div>Pick 2 cards to see if they match. A matching pair is found when 2 cards have matching numbers.</div>
+        ) : (<div></div>)}
       </div>
-      <div className="body">
-        <div className="gameStatus">
+      <div>
+        <div>
           {gameStatus !== 'active' ? (
             <PlayAgain onClick={() => {
               props.startNewGame;
               startNewGame();
             }} />
           ) : (
-            <div className="cardLayout">
-              {utils.range(1, 9).map(card => (
-                (
-                  <PlayCard
-                    key={`${card}a`}
-                    status={cardStatus(card)}
-                    card={card}
-                    onClick={() => onCardClick(card, cardStatus(card))}
-                  />
-                )
-              ))}
-              {utils.range(1, 9).map(card => (
-                (
-                  <PlayCard
-                    key={`${card}b`}
-                    status={cardStatus(card)}
-                    card={card}
-                    onClick={() => onCardClick(card, cardStatus(card))}
-                  />
-                )
-              ))}
+            <div>
+              <div>
+                {gameCards.map(card => (
+                  (
+                    <PlayCard
+                      key={`${card}`}
+                      status={cardStatus(`${card}`)}
+                      card={`${card[0]}`}
+                      onClick={() => onCardClick(`${card}`, cardStatus(`${card}`))}
+                    />
+                  )
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -121,3 +131,20 @@ const Game = props => {
 };
 
 export default Game;
+
+function filterAndSetHiddenCards(newHiddenCards, hiddenCards, newCandidateCards, setHiddenCards) {
+  newHiddenCards = hiddenCards.filter(
+    c => !newCandidateCards.includes(c)
+  );
+  setHiddenCards(newHiddenCards);
+  return newHiddenCards;
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  return arr;
+}
