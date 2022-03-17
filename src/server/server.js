@@ -2,13 +2,11 @@ import express from 'express';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import App from '../components/App';
-//import path from 'path';
 
 const app = express();
-//const { join } = path;
 
 app.use(express.static('dist'));
-//app.use(express.static(join(__dirname, '../../public/')));
+
 app.get('/', (req, res) => {
   const initialMarkup = ReactDOMServer.renderToString(<App />);
 
@@ -18,10 +16,11 @@ app.get('/', (req, res) => {
         <title>Card Memory</title>
       </head>
       <body style="background-color:lightblue">
+      <h1 style="text-align: center">Test Your Memory</h1>
         <div id="mountNode">${initialMarkup}</div>
       </body>
     </html>
   `)
 });
 
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 4243);

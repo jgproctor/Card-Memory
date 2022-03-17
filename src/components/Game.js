@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import PlayCard from './PlayCard';
 import PlayAgain from './PlayAgain';
+import styles from './game.css';
 
 const useGameState = () => {
   const cards = ['1a', '2a', '3a', '4a', '5a', '6a', '7a', '8a', '1b', '2b', '3b', '4b', '5b', '6b', '7b', '8b'];
-  let isWrongMatch = false;
   let shuffledCards = shuffleArray(cards)
   const [candidateCards, setCandidateCards] = useState([]);
   const [visibleCards, setVisibleCards] = useState([]);
@@ -20,13 +20,13 @@ const useGameState = () => {
     }
   });
 
-  useRef(() => {
-    if (isWrongMatch) {
-      const timer = setTimeout(() => { }, 2000);
-      isWrongMatch = false;
-      return () => clearTimeout(timer);
-    }
-  });
+  // useRef(() => {
+  //   if (isWrongMatch) {
+  //     const timer = setTimeout(() => { }, 2000);
+  //     isWrongMatch = false;
+  //     return () => clearTimeout(timer);
+  //   }
+  // });
 
   const setGameState = (newCandidateCards) => {
     let newHiddenCards;
@@ -39,7 +39,6 @@ const useGameState = () => {
       setVisibleCards(visibleCards.concat(newCandidateCards));
       setCandidateCards([]);
     } else if (newCandidateCards.length == 2 && newCandidateCards[0][0] !== newCandidateCards[1][0]) {
-      isWrongMatch = true;
       newHiddenCards = hiddenCards.filter(
         c => !newCandidateCards.includes(c)
       );
@@ -95,7 +94,7 @@ const Game = props => {
     <div>
       <div>
         {gameStatus === 'active' ? (
-          <div>Pick 2 cards to see if they match. A matching pair is found when 2 cards have matching numbers.</div>
+          <h3>Pick 2 cards to see if they match. A matching pair is found when 2 cards have matching numbers.</h3>
         ) : (<div></div>)}
       </div>
       <div>
@@ -107,7 +106,7 @@ const Game = props => {
             }} />
           ) : (
             <div>
-              <div>
+              <div className={styles.flexContainer}>
                 {gameCards.map(card => (
                   (
                     <PlayCard
@@ -123,7 +122,7 @@ const Game = props => {
           )}
         </div>
       </div>
-      <div className="timer">
+      <div>
         Elapsed Time: {secondsPassed}
       </div>
     </div>
