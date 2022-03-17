@@ -6,10 +6,8 @@
   "scripts": {
     "test": "jest",
     "prod:build": "babel lib -d dist",
-    "prod:server": "node src/server/server.js",
-    "prod:bundler": "webpack -w --mode=production",
-    "dev:server": "nodemon --exec babel-node src/server/server.js --ignore dist/",
-    "dev:bundler": "webpack -w --mode=development"
+    "start": "webpack -w --mode=production && node src/server/server.js",
+    "start-dev": "webpack -w --mode=development && nodemon --exec babel-node src/server/server.js --ignore dist/"
   },
   "repository": {
     "type": "git",
