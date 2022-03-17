@@ -23,4 +23,6 @@ app.get('/', (req, res) => {
   `)
 });
 
-app.listen(process.env.PORT || 4243);
+app.listen(process.env.PORT || 4243, '0.0.0.0', () => {
+  console.log("Server is running.")
+});
